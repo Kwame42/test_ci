@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  DOCKER_IMAGE: votreusername/mon-app
+  DOCKER_IMAGE: kwame42/mon-app
   IMAGE_TAG: latest
 
 jobs:
