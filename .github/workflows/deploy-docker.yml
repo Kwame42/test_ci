@@ -1,21 +1,37 @@
-name: Build and Deploy
+name: Build and Deploy to Docker Hub
 
 on:
   push:
     branches: [main]
 
+env:
+  DOCKER_IMAGE: kwame42/mon-app
+  IMAGE_TAG: latest
+
+
 jobs:
-  deploy:
+  build-and-push:
+    environment: CI/CD
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v3
       
-      - name: Login and Push
-        run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          docker build -t kwame42/mon-app:latest .
-          docker push kwame42/mon-app:latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
       
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -24,5 +40,4 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            /usr/local/bin/deploy.sh kwame42/mon-app:latest
-
+            /usr/local/bin/deploy.sh ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
