@@ -8,6 +8,7 @@ env:
   DOCKER_IMAGE: kwame42/mon-app
   IMAGE_TAG: latest
 
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
